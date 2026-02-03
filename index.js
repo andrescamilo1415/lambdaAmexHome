@@ -65,7 +65,7 @@ export const handler = async (event) => {
       busboy.end(body);
     });
 
-    const htmlBody = `
+    const html = `
       <h2>Nuevo formulario recibido</h2>
       <ul>
         <li><b>Nombre:</b> ${fields.name}</li>
@@ -77,18 +77,18 @@ export const handler = async (event) => {
         <li><b>Reminders:</b> ${fields.reminders}</li>
       </ul>
     `;
-console.log(htmlBody)
-console.log('TO_EMAIL: ', process.env.TO_EMAIL)
-console.log('emailFrom: ', process.env.NOTIFICATION_EMAIL)
-   const resp= await sendEmail({
+    console.log(html);
+    console.log("TO_EMAIL: ", process.env.TO_EMAIL);
+    console.log("emailFrom: ", process.env.NOTIFICATION_EMAIL);
+    const resp = await sendEmail({
       to: process.env.TO_EMAIL,
       subject: "NUEVO CONTACTO",
-      htmlBody,
+      html,
       from: emailFrom,
       attachments: files,
     });
 
-console.log(resp)
+    console.log(resp);
 
     return response(200, "Correo enviado correctamente");
   } catch (error) {
