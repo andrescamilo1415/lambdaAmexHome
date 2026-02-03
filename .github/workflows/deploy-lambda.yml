@@ -1,0 +1,60 @@
+name: Deploy Lambda to Multiple Functions
+
+on:
+  push:
+    branches:
+      - mainXXX
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        lambda:
+          - amexhome_lambda_contactus
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies (if any)
+        run: npm install || true
+
+      - name: Zip Lambda code
+        run: |
+          zip -r function.zip . -x "*.git*" "*.github*"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to Lambda
+        run: |
+          set -e
+          FUNCTION_NAME=${{ secrets[matrix.lambda] }}
+
+          echo "Deploying to function: $FUNCTION_NAME"
+
+          if aws lambda get-function --function-name "$FUNCTION_NAME" >/dev/null 2>&1; then
+            echo "Function exists. Updating..."
+            aws lambda update-function-code \
+              --function-name "$FUNCTION_NAME" \
+              --zip-file fileb://function.zip \
+              --publish
+          else
+            echo "Function not found. Creating new function..."
+            aws lambda create-function \
+              --function-name "$FUNCTION_NAME" \
+              --runtime nodejs20.x \
+              --role ${{ secrets.LAMBDA_ROLE_ARN }} \
+              --handler index.handler \
+              --zip-file fileb://function.zip \
+              --publish
+          fi
