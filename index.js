@@ -78,21 +78,17 @@ export const handler = async (event) => {
       </ul>
     `;
 console.log(htmlBody)
-    await sendEmail({
+console.log('TO_EMAIL: ', process.env.TO_EMAIL)
+console.log('emailFrom: ', process.env.NOTIFICATION_EMAIL)
+   const resp= await sendEmail({
       to: process.env.TO_EMAIL,
-      subject: "Nuevo CONTACTO",
+      subject: "NUEVO CONTACTO",
       htmlBody,
       from: emailFrom,
       attachments: files,
     });
 
-    /*     await transporter.sendMail({
-      from: process.env.NOTIFICATION_EMAIL, // ⚠️ debe estar verificado en SES
-      to: process.env.TO_EMAIL,
-      subject: `Formulario: ${fields.subject || "Sin asunto"}`,
-      html: htmlBody,
-      attachments: files,
-    }); */
+console.log(resp)
 
     return response(200, "Correo enviado correctamente");
   } catch (error) {
