@@ -3,7 +3,7 @@ name: Deploy Lambda to Multiple Functions
 on:
   push:
     branches:
-      - mainXXX
+      - main
 
 jobs:
   deploy:
